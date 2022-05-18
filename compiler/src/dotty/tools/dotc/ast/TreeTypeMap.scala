@@ -7,6 +7,7 @@ import Types._, Contexts._, Flags._
 import Symbols._, Annotations._, Trees._, Symbols._, Constants.Constant
 import Decorators._
 import dotty.tools.dotc.transform.SymUtils._
+import transform.LazyVals
 
 /** A map that applies three functions and a substitution together to a tree and
  *  makes sure they are coordinated so that the result is well-typed. The functions are
@@ -210,11 +211,17 @@ class TreeTypeMap(
       mapped.filter(_.isClass).foldLeft(substMap) { (tmap, cls) =>
         val origDcls = cls.info.decls.toList.filterNot(_.is(TypeParam))
         val tmap0 = tmap.withSubstitution(origCls(cls).typeParams, cls.typeParams)
+
         val mappedDcls = mapSymbols(origDcls, tmap0, mapAlways = true)
+        println()
+        println("LAZY_VALS_DEBUG BEFORE SYMBOLS")
+        println("LAZY_VALS_DEBUG DECLS.info " + cls.asClass.classInfo.decls.toList.map(x => x.denot.toString + " - " + x.denot.ownersIterator.toList).mkString("\n"))
         val tmap1 = tmap.withMappedSyms(
           origCls(cls).typeParams ::: origDcls,
           cls.typeParams ::: mappedDcls)
         origDcls.lazyZip(mappedDcls).foreach(cls.asClass.replace)
+        println("LAZY_VALS_DEBUG AFTER SYMBOLS")
+        println("LAZY_VALS_DEBUG DECLS.info " + cls.asClass.classInfo.decls.toList.map(x => x.denot.toString + " - " + x.denot.ownersIterator.toList).mkString("\n"))
         tmap1
       }
 

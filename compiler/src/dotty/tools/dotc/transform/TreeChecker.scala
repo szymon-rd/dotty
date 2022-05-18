@@ -456,6 +456,12 @@ class TreeChecker extends Phase with SymTransformer {
       def ownerMatches(symOwner: Symbol, ctxOwner: Symbol): Boolean =
         symOwner == ctxOwner ||
         ctxOwner.isWeakOwner && ownerMatches(symOwner, ctxOwner.owner)
+      if !ownerMatches(tree.symbol.owner, ctx.owner) then
+        println("LAZY_VALS_DEBUG OWNER MISMATCHED " + tree.show)
+        println("OWNER " + tree.symbol.owner)
+        println("OWNERS \n" + tree.symbol.denot.ownersIterator.toList.mkString("\n"))
+        println("CTX OWNER " + ctx.owner)
+        println("CTX OWNERS \n" + ctx.owner.denot.ownersIterator.toList.mkString("\n"))
       assert(ownerMatches(tree.symbol.owner, ctx.owner),
         i"bad owner; ${tree.symbol} has owner ${tree.symbol.owner}, expected was ${ctx.owner}\n" +
         i"owner chain = ${tree.symbol.ownersIterator.toList}%, %, ctxOwners = ${ctx.outersIterator.map(_.owner).toList}%, %")
@@ -481,7 +487,20 @@ class TreeChecker extends Phase with SymTransformer {
       def isAllowed(sym: Symbol): Boolean = sym.is(ConstructorProxy)
 
       val symbolsNotDefined = (decls -- defined - constr.symbol).filterNot(isAllowed)
-
+      if(symbolsNotDefined.nonEmpty) {
+        println("LAZY_VALS_DEBUG SYMBOLS NOT DEFINED")
+        println("CLASS OWNER " + cdef.symbol.owner)
+        println("DECLS " + decls.map(_.toString))
+        println("DECLS show " + decls.map(_.show))
+        println("DECLS.info " + decls.map(x => x.denot.toString + " - " + x.denot.ownersIterator.toList).mkString("\n"))
+        println()
+        println("DEFINED " + defined.map(x => x.denot.toString + " - " + x.denot.ownersIterator.toList).mkString("\n"))
+        println("DEFINED show " + defined.map(_.show))
+        println()
+        println("CONSTR " + constr.symbol)
+        println()
+        println("NOT DEFINED " + symbolsNotDefined)
+      }
       assert(symbolsNotDefined.isEmpty,
         i" $cls tree does not define members: ${symbolsNotDefined.toList}%, %\n" +
         i"expected: ${decls.toList}%, %\n" +
