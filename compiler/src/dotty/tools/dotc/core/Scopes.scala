@@ -247,8 +247,6 @@ object Scopes {
 
     /** create and enter a scope entry with given name and symbol */
     protected def newScopeEntry(name: Name, sym: Symbol)(using Context): ScopeEntry = {
-      if(sym.toString.contains("apply$direct"))
-        println("LAZY_VALS_DEBUG Creating with name " + name + " at " + Thread.currentThread().getStackTrace.map(_.toString).mkString("\n"))
       ensureCapacity(if (hashTable != null) hashTable.uncheckedNN.length else MinHashedScopeSize)
       val e = new ScopeEntry(name, sym, this)
       e.prev = lastEntry
@@ -268,8 +266,6 @@ object Scopes {
 
     /** enter a symbol in this scope. */
     final def enter[T <: Symbol](sym: T)(using Context): T = {
-      if(sym.name.toString.contains("apply$direct"))
-          println("ENTERING " + sym)
       if (sym.isType && ctx.phaseId <= typerPhase.id)
         assert(lookup(sym.name) == NoSymbol,
           s"duplicate ${sym.debugString}; previous was ${lookup(sym.name).debugString}") // !!! DEBUG
@@ -356,14 +352,8 @@ object Scopes {
     final def replace(prev: Symbol, replacement: Symbol)(using Context): Unit = {
       require(prev.name == replacement.name)
       var e = lookupEntry(prev.name)
-      println("LAZY_VALS_DEBUG Lookup of " + prev.name + " = " + e)
-      println(iterator.map(_.name).mkString("\n"))
       while (e != null) {
-        println("LAZY_VALS_DEBUG Comparing " + e.sym.toString + " with " + prev.toString + "...")
-        if (e.sym == prev) {
-          println("LAZY_VALS_DEBUG REPLACED!")
-          e.sym = replacement
-        }
+        if (e.sym == prev) e.sym = replacement
         e = lookupNextEntry(e)
       }
       elemsCache = null

@@ -1980,7 +1980,6 @@ object SymDenotations {
      *  @pre `prev` and `replacement` have the same name.
      */
     def replace(prev: Symbol, replacement: Symbol)(using Context): Unit = {
-      println("REPLACING " + prev + " with " + replacement)
       unforcedDecls.openForMutations.replace(prev, replacement)
       if (myMemberCache != null) myMemberCache.uncheckedNN.remove(replacement.name)
     }

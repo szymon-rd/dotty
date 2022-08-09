@@ -211,17 +211,11 @@ class TreeTypeMap(
       mapped.filter(_.isClass).foldLeft(substMap) { (tmap, cls) =>
         val origDcls = cls.info.decls.toList.filterNot(_.is(TypeParam))
         val tmap0 = tmap.withSubstitution(origCls(cls).typeParams, cls.typeParams)
-
         val mappedDcls = mapSymbols(origDcls, tmap0, mapAlways = true)
-        println()
-        println("LAZY_VALS_DEBUG BEFORE SYMBOLS")
-        println("LAZY_VALS_DEBUG DECLS.info " + cls.asClass.classInfo.decls.toList.map(x => x.denot.toString + " - " + x.denot.ownersIterator.toList).mkString("\n"))
         val tmap1 = tmap.withMappedSyms(
           origCls(cls).typeParams ::: origDcls,
           cls.typeParams ::: mappedDcls)
         origDcls.lazyZip(mappedDcls).foreach(cls.asClass.replace)
-        println("LAZY_VALS_DEBUG AFTER SYMBOLS")
-        println("LAZY_VALS_DEBUG DECLS.info " + cls.asClass.classInfo.decls.toList.map(x => x.denot.toString + " - " + x.denot.ownersIterator.toList).mkString("\n"))
         tmap1
       }
 
