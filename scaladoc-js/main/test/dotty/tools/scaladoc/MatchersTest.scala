@@ -30,7 +30,8 @@ class MatchersTest:
   private val pages = for {
     kind <- kinds
     name <- names
-  } yield PageEntry(
+  } yield 
+    PageEntry(
     s"$kind $name",
     "",
     "",
