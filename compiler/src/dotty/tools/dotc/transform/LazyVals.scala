@@ -338,10 +338,15 @@ class LazyVals extends MiniPhase with IdentityDenotTransformer {
    *     val current: AnyRef = _x
    *     if current == null then
    *       if CAS(_x, null, Evaluating) then
+   *         var resultNullable: AnyRef = null
    *         var result: AnyRef = null
    *         try
+   *           resultNullable = rhs
    *           nullable = null
-   *           if result == null then result = NullValue
+   *           if resultNullable == null then
+   *             result = NullValue
+   *           else
+   *             result = resultNullable
    *           return result
    *         finally
    *            if !CAS(_x, Evaluating, result) then
@@ -417,6 +422,7 @@ class LazyVals extends MiniPhase with IdentityDenotTransformer {
     // if observed a null (uninitialized) value
     val initialize = {
       // var result: AnyRef
+      val resSymbNullable = newSymbol(lazyInitMethodSymbol, lazyNme.result, Synthetic | Mutable, defn.ObjectType)
       val resSymb = newSymbol(lazyInitMethodSymbol, lazyNme.result, Synthetic | Mutable, defn.ObjectType)
       // releasing block in finally
       val lockRel = {
@@ -430,26 +436,26 @@ class LazyVals extends MiniPhase with IdentityDenotTransformer {
           objCasFlag.appliedTo(thiz, offset, evaluating, ref(resSymb)).select(nme.UNARY_!).appliedToNone,
           lockRel,
           unitLiteral
-        ) :: Nil, Return(ref(resSymb), lazyInitMethodSymbol)).withType(defn.UnitType)
+        ) :: Nil, unitLiteral).withType(defn.UnitType)
       // entire try block
       val evaluate = Try(
 
         Block(
-          (Assign(ref(resSymb), if needsBoxing(tp) && rhsMappedOwner != EmptyTree then rhsMappedOwner.ensureConforms(boxIfCan(tp)) else rhsMappedOwner) // try result = rhs
+          (Assign(ref(resSymbNullable), if needsBoxing(tp) && rhsMappedOwner != EmptyTree then rhsMappedOwner.ensureConforms(boxIfCan(tp)) else rhsMappedOwner) // try result = rhs
           :: If(
-              ref(resSymb).select(defn.Any_==).appliedTo(nullLiteral),
+              ref(resSymbNullable).select(defn.Any_==).appliedTo(nullLiteral),
               Assign(ref(resSymb), nullValue),
-              unitLiteral
+              Assign(ref(resSymb), ref(resSymbNullable))
           ) :: Nil)
           ::: nullOut(nullableFor(accessorMethodSymbol)),
-          unitLiteral),
+          Return(ref(resSymbNullable), lazyInitMethodSymbol)),
         Nil,
         fin
       )
       // if CAS(_, null, Evaluating)
       If(
         objCasFlag.appliedTo(thiz, offset, nullLiteral, evaluating),
-        Block(ValDef(resSymb, nullLiteral) :: Nil, // var result: AnyRef = null
+        Block(ValDef(resSymb, nullLiteral) :: ValDef(resSymbNullable, nullLiteral) :: Nil, // var result: AnyRef = null
           evaluate), // try ... finally ...
         unitLiteral
       ).withType(defn.UnitType)
