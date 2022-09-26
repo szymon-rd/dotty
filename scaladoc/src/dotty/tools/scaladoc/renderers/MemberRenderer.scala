@@ -18,7 +18,7 @@ class MemberRenderer(signatureRenderer: SignatureRenderer)(using DocContext) ext
 
   def doc(m: Member): Seq[AppliedTag] =  m.docs.fold(Nil)(d => Seq(renderDocPart(d.body)))
 
-  def tableRow(name: String, content: TagArg*) = Seq(dt(cls := "body-small")(name), dd(cls := "body-medium")(content*))
+  def tableRow(name: String, content: TagArg*) = Seq(tr(td(cls := "attribute-name")(name), td(cls := "attribute-value")(content*)))
 
   def defintionClasses(m: Member) = m.origin match
     case Origin.Overrides(defs) =>
@@ -123,7 +123,7 @@ class MemberRenderer(signatureRenderer: SignatureRenderer)(using DocContext) ext
         div(cls := "cover")(
           div(cls := "doc")(bodyContents),
           Option.when(withAttributes)(h2(cls := "h500")("Attributes")).toList,
-          dl(cls := "attributes")(attributes*)
+          table(cls := "attributes")(attributes*)
         )
       )
     ).flatten
