@@ -422,7 +422,7 @@ class LazyVals extends MiniPhase with IdentityDenotTransformer {
     // if observed a null (uninitialized) value
     val initialize = {
       // var result: AnyRef
-      val resSymbNullable = newSymbol(lazyInitMethodSymbol, lazyNme.result, Synthetic | Mutable, defn.ObjectType)
+      val resSymbNullable = newSymbol(lazyInitMethodSymbol, lazyNme.resultNullable, Synthetic | Mutable, defn.ObjectType)
       val resSymb = newSymbol(lazyInitMethodSymbol, lazyNme.result, Synthetic | Mutable, defn.ObjectType)
       // releasing block in finally
       val lockRel = {
@@ -747,6 +747,7 @@ object LazyVals {
     val flag: TermName        = "flag".toTermName
     val state: TermName       = "state".toTermName
     val result: TermName      = "result".toTermName
+    val resultNullable: TermName      = "resultNullable".toTermName
     val value: TermName       = "value".toTermName
     val initialized: TermName = "initialized".toTermName
     val initialize: TermName  = "initialize".toTermName
