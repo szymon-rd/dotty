@@ -42,10 +42,9 @@ class CompilationTests {
       compileFilesInDir("tests/pos-scala2", scala2CompatMode),
       compileFilesInDir("tests/pos-custom-args/captures", defaultOptions.and("-Ycc")),
       compileFilesInDir("tests/pos-custom-args/erased", defaultOptions.and("-language:experimental.erasedDefinitions")),
-      compileFilesInDir("tests/pos", defaultOptions.and("-Ysafe-init"), FileFilter.exclude("lazy-vals-all")),
-      // Run tests for experimental lightweight lazy vals and stable lazy vals
-      compileFilesInDir("tests/pos/lazy-vals-all", defaultOptions.and("-Ysafe-init", "-Ylightweight-lazy-vals")),
-      compileFilesInDir("tests/pos/lazy-vals-all", defaultOptions.and("-Ysafe-init")),
+      compileFilesInDir("tests/pos", defaultOptions.and("-Ysafe-init")),
+      // Run tests for experimental lightweight lazy vals
+      compileFilesInDir("tests/pos", defaultOptions.and("-Ysafe-init", "-Ylightweight-lazy-vals"), FileFilter.include(TestSources.posLazyValsAllowlist)),
       compileFilesInDir("tests/pos-deep-subtype", allowDeepSubtypes),
       compileFilesInDir("tests/pos-custom-args/no-experimental", defaultOptions.and("-Yno-experimental")),
       compileDir("tests/pos-special/java-param-names", defaultOptions.withJavacOnlyOptions("-parameters")),
@@ -218,10 +217,9 @@ class CompilationTests {
       compileDir("tests/run-custom-args/Xmacro-settings/compileTimeEnv", defaultOptions.and("-Xmacro-settings:a,b=1,c.b.a=x.y.z=1,myLogger.level=INFO")),
       compileFilesInDir("tests/run-custom-args/captures", allowDeepSubtypes.and("-Ycc")),
       compileFilesInDir("tests/run-deep-subtype", allowDeepSubtypes),
-      compileFilesInDir("tests/run", defaultOptions.and("-Ysafe-init"), FileFilter.exclude("lazy-vals-all")),
-      // Run tests for experimental lightweight lazy vals and stable lazy vals. serialization-new-legacy is kept to check all cases aside from not working transient (I removed the test that was not testing it)
-      compileFilesInDir("tests/run/lazy-vals-all", defaultOptions.and("-Ysafe-init", "-Ylightweight-lazy-vals"), FileFilter.exclude("serialization-new-legacy.scala")),
-      compileFilesInDir("tests/run/lazy-vals-all", defaultOptions.and("-Ysafe-init"), FileFilter.exclude("serialization-new.scala"))
+      compileFilesInDir("tests/run", defaultOptions.and("-Ysafe-init"), FileFilter.exclude("serialization-new.scala")),
+      // Run tests for experimental lightweight lazy vals and stable lazy vals.
+      compileFilesInDir("tests/run", defaultOptions.and("-Ysafe-init", "-Ylightweight-lazy-vals"), FileFilter.include(TestSources.runLazyValsAllowlist)),
     ).checkRuns()
   }
 
