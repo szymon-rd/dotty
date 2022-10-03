@@ -11,3 +11,4 @@ tagless.scala
 safeThrowsStrawman2.scala
 t7584.scala
 function-arity.scala
+lazy-vals-all

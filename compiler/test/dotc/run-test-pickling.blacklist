@@ -44,3 +44,4 @@ t6138
 t6138-2
 i12656.scala
 trait-static-forwarder
+lazy-vals-all
