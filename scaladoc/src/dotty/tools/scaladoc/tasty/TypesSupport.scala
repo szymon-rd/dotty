@@ -100,7 +100,12 @@ trait TypesSupport:
       plain(s"Unsupported[$name]").l
     tp match
       case OrType(left, right) => inner(left) ++ keyword(" | ").l ++ inner(right)
-      case AndType(left, right) => inner(left) ++ keyword(" & ").l ++ inner(right)
+      case AndType(left, right) =>
+        def wrap(tr: reflect.TypeRepr) =
+          tr match
+            case _: OrType => plain("(").l ++ inner(tr) ++ plain(")").l
+            case _ => inner(tr)
+        wrap(left) ++ keyword(" & ").l ++ wrap(right)
       case ByNameType(tpe) => keyword("=> ") :: inner(tpe)
       case ConstantType(constant) =>
         plain(constant.show).l
