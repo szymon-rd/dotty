@@ -102,6 +102,7 @@ object Settings:
         ArgsSummary(updateIn(sstate, value1), args, errors, dangers)
       end update
 
+      
       def fail(msg: String, args: List[String]) =
         ArgsSummary(sstate, args, errors :+ msg, warnings)
 
